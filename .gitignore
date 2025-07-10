@@ -1,0 +1,58 @@
+# Logs
+**/logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# Dependency directories
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/.next/
+**/out/
+
+# Production envs
+**/.env
+**/.env.*.local
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# VSCode settings
+.vscode/
+.history/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage (jest, c8, etc.)
+**/coverage/
+**/coverage-final.json
+**/nyc_output/
+
+# Next.js cache
+**/.vercel/
+**/.next/
+
+# NestJS specific
+**/.webpack/
+**/build/
+**/tmp/
+
+# Typescript
+**/*.tsbuildinfo
+
+# Misc
+*.swp
+*.swo
+*.idea/
+
+# Optional: remove lockfile if not using it consistently
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
