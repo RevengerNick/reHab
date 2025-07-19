@@ -1,8 +1,9 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,10 +27,22 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
-  
-  // Метод регистрации мы вызовем из контроллера
-  async register(createUserDto: any) { // В идеале здесь должен быть DTO
-    // Логика создания пользователя уже в UsersService
-    return this.usersService.create(createUserDto);
+
+  async register(registerDto: RegisterDto) {
+    // Проверяем, существует ли пользователь с таким email
+    const existingUser = await this.usersService.findOneByEmail(registerDto.email);
+    if (existingUser) {
+      throw new BadRequestException('Пользователь с таким email уже существует');
+    }
+
+    // Создаем пользователя
+    const user = await this.usersService.create({
+      email: registerDto.email,
+      password: registerDto.password,
+    });
+
+    // Возвращаем только нужные поля
+    const { password, ...result } = user;
+    return result;
   }
 }

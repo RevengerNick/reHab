@@ -1,30 +1,34 @@
 // src/auth/auth.controller.ts
-import { Controller, Post, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Request, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
-// Пока что используем any, потом заменим на DTO
-class CreateUserDto {
-    email: string;
-    password: string;
-}
+import { AuthGuard } from '@nestjs/passport';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
-  
-  // Этот эндпоинт мы пока не можем использовать, т.к. не создали Guard
-  // @UseGuards(LocalAuthGuard) // Добавим позже
+
+  // 1. Применяем гард 'local'. NestJS найдет нашу LocalStrategy.
+  // 2. Стратегия выполнит метод validate. Если успешно, пользователь добавится в req.user.
+  // 3. Только после этого выполнится тело метода login.
+  @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Body() body: CreateUserDto) { // Временно для проверки
-    const user = await this.authService.validateUser(body.email, body.password);
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-    return this.authService.login(user);
+  async login(@Request() req) {
+    // req.user сюда подставит Passport после успешной валидации в LocalStrategy
+    return this.authService.login(req.user);
+  }
+
+  // А вот и защищенный маршрут!
+  // Этот гард будет использовать нашу JwtStrategy.
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  getProfile(@Request() req) {
+    // Благодаря JwtStrategy, в req.user будет полная информация о пользователе
+    return req.user;
   }
 }
