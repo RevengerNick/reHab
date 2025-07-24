@@ -23,7 +23,9 @@ export class ChannelsResolver {
 
   @Query(() => [Channel], { name: 'channels' })
   @UseGuards(ProjectOwnerGuard)
-  findAllByProjectId(@Args('projectId', { type: () => String }) projectId: string) {
+  findAllByProjectId(
+    @Args('projectId', { type: () => String }) projectId: string,
+  ) {
     return this.channelsService.findAllByProjectId(projectId);
   }
 
@@ -32,14 +34,15 @@ export class ChannelsResolver {
   updateChannel(
     @Args('updateChannelInput') updateChannelInput: UpdateChannelDto,
   ) {
-    return this.channelsService.update(updateChannelInput.id, updateChannelInput);
+    return this.channelsService.update(
+      updateChannelInput.id,
+      updateChannelInput,
+    );
   }
 
   @Mutation(() => SuccessResponse)
   @UseGuards(ProjectOwnerGuard)
-  removeChannel(
-    @Args('input') input: RemoveChannelInput,
-  ) {
+  removeChannel(@Args('input') input: RemoveChannelInput) {
     return this.channelsService.remove(input.channelId, input.projectId);
-}
+  }
 }

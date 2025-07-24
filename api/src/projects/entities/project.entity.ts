@@ -8,11 +8,11 @@ export class Project {
   @IsUUID()
   id: string;
 
-  @Field()  
+  @Field()
   @IsString()
   name: string;
-  
-  @Field()  
+
+  @Field()
   @IsString()
   apiKey: string;
 

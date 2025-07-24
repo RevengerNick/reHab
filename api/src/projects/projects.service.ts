@@ -8,7 +8,10 @@ import { Project } from './entities/project.entity';
 export class ProjectsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createProjectDto: CreateProjectDto, userId: string): Promise<Project> {
+  async create(
+    createProjectDto: CreateProjectDto,
+    userId: string,
+  ): Promise<Project> {
     return this.prisma.project.create({
       data: {
         ...createProjectDto,
@@ -23,17 +26,20 @@ export class ProjectsService {
 
   async findAllByUserId(userId: string): Promise<Project[]> {
     return this.prisma.project.findMany({
-      where: { userId }
+      where: { userId },
     });
   }
 
   async findOne(id: string): Promise<Project | null> {
     return this.prisma.project.findUnique({
-      where: { id }
+      where: { id },
     });
   }
 
-  async update(id: string, updateProjectDto: UpdateProjectDto): Promise<Project> {
+  async update(
+    id: string,
+    updateProjectDto: UpdateProjectDto,
+  ): Promise<Project> {
     return this.prisma.project.update({
       where: { id },
       data: updateProjectDto,

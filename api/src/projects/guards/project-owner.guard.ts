@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -15,10 +20,15 @@ export class ProjectOwnerGuard implements CanActivate {
       return false;
     }
 
-    const projectId = args.projectId || args.createChannelInput?.projectId || args.updateChannelInput?.projectId;
+    const projectId =
+      args.projectId ||
+      args.createChannelInput?.projectId ||
+      args.updateChannelInput?.projectId;
 
     if (!projectId) {
-      throw new Error('ProjectOwnerGuard не смог найти projectId в аргументах запроса');
+      throw new Error(
+        'ProjectOwnerGuard не смог найти projectId в аргументах запроса',
+      );
     }
 
     const project = await this.prisma.project.findUnique({

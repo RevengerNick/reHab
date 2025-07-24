@@ -15,7 +15,7 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
   });
-  
+
   afterEach(async () => {
     await app.close();
   });
@@ -29,7 +29,7 @@ describe('AppController (e2e)', () => {
         expect(res.body).toHaveProperty('time');
       });
   });
-  
+
   // it('/projects (GET) - should fail without auth token', () => {
   //   return request(app.getHttpServer())
   //     .get('/graphql')

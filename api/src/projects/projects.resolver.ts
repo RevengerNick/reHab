@@ -12,7 +12,7 @@ export class ProjectsResolver {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Mutation(() => Project)
-  @UseGuards(GqlAuthGuard) 
+  @UseGuards(GqlAuthGuard)
   createProject(
     @Args('createProjectInput') createProjectInput: CreateProjectDto,
     @Context() context,
@@ -21,26 +21,26 @@ export class ProjectsResolver {
   }
 
   @Query(() => [Project], { name: 'projects' })
-  @UseGuards(GqlAuthGuard) 
+  @UseGuards(GqlAuthGuard)
   findAll(@Context() context) {
     return this.projectsService.findAllByUserId(context.req.user.id);
   }
 
   @Mutation(() => Project)
-  @UseGuards(GqlAuthGuard) 
+  @UseGuards(GqlAuthGuard)
   updateProject(
     @Args('updateProjectInput') updateProjectInput: UpdateProjectDto,
     @Context() context,
   ) {
-    return this.projectsService.update(updateProjectInput.id, updateProjectInput);
+    return this.projectsService.update(
+      updateProjectInput.id,
+      updateProjectInput,
+    );
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard) 
-  deleteProject(
-    @Args('id') id: string,
-    @Context() context,
-  ) {
+  @UseGuards(GqlAuthGuard)
+  deleteProject(@Args('id') id: string, @Context() context) {
     return this.projectsService.remove(id);
   }
 }
