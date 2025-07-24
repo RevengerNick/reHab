@@ -34,7 +34,9 @@ export class ChannelsService {
     });
 
     if (result.count === 0) {
-      throw new NotFoundException(`Канал с ID ${channelId} не найден в проекте ${projectId}`);
+      throw new NotFoundException(
+        `Канал с ID ${channelId} не найден в проекте ${projectId}`,
+      );
     }
 
     return { success: true };

@@ -6,7 +6,12 @@ import { ProjectOwnerGuard } from './guards/project-owner.guard';
 
 @Module({
   controllers: [],
-  providers: [ProjectsService, PrismaService, ProjectsResolver, ProjectOwnerGuard],
+  providers: [
+    ProjectsService,
+    PrismaService,
+    ProjectsResolver,
+    ProjectOwnerGuard,
+  ],
   exports: [ProjectsService],
 })
 export class ProjectsModule {}

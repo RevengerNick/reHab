@@ -34,7 +34,7 @@ import { ChannelsModule } from './channels/channels.module';
             extensions: { code: extensions.code },
           };
         }
-        
+
         // А если это непредвиденная внутренняя ошибка сервера - скрываем детали
         return {
           message: 'Произошла внутренняя ошибка сервера',
