@@ -12,7 +12,7 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60m' }, // Токен будет жить 1 час
+      signOptions: { expiresIn: '3d' }, // Токен будет жить 1 час
     }),
   ],
   controllers: [AuthController],

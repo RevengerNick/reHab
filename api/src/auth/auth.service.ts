@@ -29,19 +29,16 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    // Проверяем, существует ли пользователь с таким email
     const existingUser = await this.usersService.findOneByEmail(registerDto.email);
     if (existingUser) {
       throw new BadRequestException('Пользователь с таким email уже существует');
     }
 
-    // Создаем пользователя
     const user = await this.usersService.create({
       email: registerDto.email,
       password: registerDto.password,
     });
 
-    // Возвращаем только нужные поля
     const { password, ...result } = user;
     return result;
   }

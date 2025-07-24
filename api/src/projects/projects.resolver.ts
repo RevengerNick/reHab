@@ -5,14 +5,14 @@ import { Project } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { GqlAuthGuard } from '../auth/gql-auth.guard';
 
 @Resolver(() => Project)
 export class ProjectsResolver {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Mutation(() => Project)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(GqlAuthGuard) 
   createProject(
     @Args('createProjectInput') createProjectInput: CreateProjectDto,
     @Context() context,
@@ -21,13 +21,13 @@ export class ProjectsResolver {
   }
 
   @Query(() => [Project], { name: 'projects' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(GqlAuthGuard) 
   findAll(@Context() context) {
     return this.projectsService.findAllByUserId(context.req.user.id);
   }
 
   @Mutation(() => Project)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(GqlAuthGuard) 
   updateProject(
     @Args('updateProjectInput') updateProjectInput: UpdateProjectDto,
     @Context() context,
@@ -36,9 +36,9 @@ export class ProjectsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(GqlAuthGuard) 
   deleteProject(
-    @Args('id') id: number,
+    @Args('id') id: string,
     @Context() context,
   ) {
     return this.projectsService.remove(id);

@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   email     String    @unique
   password  String
   createdAt DateTime  @default(now())
@@ -24,20 +24,20 @@ model User {
 }
 
 model Project {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   name      String
   user      User      @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
   apiKey    String    @unique @default(uuid()) // Автоматически генерируем API ключ
   channels  Channel[]
   createdAt DateTime  @default(now())
 }
 
 model Channel {
-  id        Int         @id @default(autoincrement())
+  id        String      @id @default(uuid())
   type      ChannelType // EMAIL, SMS, TELEGRAM
   project   Project     @relation(fields: [projectId], references: [id])
-  projectId Int
+  projectId String
   config    Json // Здесь будут храниться API-ключи и настройки для внешних сервисов
   isEnabled Boolean     @default(true)
   createdAt DateTime    @default(now())

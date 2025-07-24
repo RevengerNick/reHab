@@ -21,7 +21,7 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async findOneById(id: number): Promise<User | null> {
+  async findOneById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 }

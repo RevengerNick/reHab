@@ -1,17 +1,22 @@
 // src/projects/entities/project.entity.ts
-import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { IsDate, IsString, IsUUID } from 'class-validator';
 
 @ObjectType()
 export class Project {
   @Field(() => ID)
-  id: number;
+  @IsUUID()
+  id: string;
 
-  @Field()
+  @Field()  
+  @IsString()
   name: string;
   
-  @Field()
+  @Field()  
+  @IsString()
   apiKey: string;
 
   @Field()
+  @IsDate()
   createdAt: Date;
 }
