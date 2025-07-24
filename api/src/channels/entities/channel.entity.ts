@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
 
 export enum ChannelTypeEnum {
@@ -29,4 +29,10 @@ export class Channel {
 
   @Field(() => String)
   projectId: string;
+}
+
+@ObjectType()
+export class SuccessResponse {
+  @Field(() => Boolean)
+  success: boolean;
 }

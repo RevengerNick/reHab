@@ -1,0 +1,79 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Channel {
+  config: JSONObject!
+  id: ID!
+  isEnabled: Boolean!
+  projectId: String!
+  type: ChannelType!
+}
+
+enum ChannelType {
+  EMAIL
+  PUSH
+  SMS
+  TELEGRAM
+}
+
+input CreateChannelDto {
+  config: JSONObject!
+  projectId: String!
+  type: ChannelType!
+}
+
+input CreateProjectDto {
+  name: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type Mutation {
+  createChannel(createChannelInput: CreateChannelDto!): Channel!
+  createProject(createProjectInput: CreateProjectDto!): Project!
+  deleteProject(id: String!): Boolean!
+  removeChannel(input: RemoveChannelInput!): SuccessResponse!
+  updateChannel(updateChannelInput: UpdateChannelDto!): Channel!
+  updateProject(updateProjectInput: UpdateProjectDto!): Project!
+}
+
+type Project {
+  apiKey: String!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+}
+
+type Query {
+  channels(projectId: String!): [Channel!]!
+  projects: [Project!]!
+}
+
+input RemoveChannelInput {
+  channelId: String!
+  projectId: String!
+}
+
+type SuccessResponse {
+  success: Boolean!
+}
+
+input UpdateChannelDto {
+  config: JSONObject
+  id: String!
+  projectId: String
+  type: ChannelType
+}
+
+input UpdateProjectDto {
+  id: String!
+}
