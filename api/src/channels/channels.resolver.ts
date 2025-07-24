@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ChannelsService } from './channels.service';
-import { Channel } from './entities/channel.entity';
+import { Channel, SuccessResponse } from './entities/channel.entity';
 import { CreateChannelDto } from './dto/create-channel.input';
 import { UpdateChannelDto } from './dto/update-channel.input';
 import { UseGuards } from '@nestjs/common';
@@ -35,11 +35,11 @@ export class ChannelsResolver {
     return this.channelsService.update(updateChannelInput.id, updateChannelInput);
   }
 
-  @Mutation(() => Channel)
+  @Mutation(() => SuccessResponse)
   @UseGuards(ProjectOwnerGuard)
   removeChannel(
     @Args('input') input: RemoveChannelInput,
   ) {
-    return this.channelsService.remove(input.channelId);
+    return this.channelsService.remove(input.channelId, input.projectId);
 }
 }

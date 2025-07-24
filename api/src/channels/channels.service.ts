@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateChannelDto } from './dto/create-channel.input';
 import { UpdateChannelDto } from './dto/update-channel.input';
@@ -25,7 +25,18 @@ export class ChannelsService {
     });
   }
 
-  remove(channelId: string) {
-    return this.prisma.channel.delete({ where: { id: channelId } });
+  async remove(channelId: string, projectId: string) {
+    const result = await this.prisma.channel.deleteMany({
+      where: {
+        id: channelId,
+        projectId: projectId,
+      },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundException(`Канал с ID ${channelId} не найден в проекте ${projectId}`);
+    }
+
+    return { success: true };
   }
 }
