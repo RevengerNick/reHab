@@ -29,6 +29,8 @@ jobs:
     defaults:
       run:
         working-directory: ./api
+    env:
+      DATABASE_URL: postgres://user:password@localhost:5432/testdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
