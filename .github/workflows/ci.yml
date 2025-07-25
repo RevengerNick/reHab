@@ -10,15 +10,12 @@ jobs:
     name: Build and Test Backend
     runs-on: ubuntu-latest
     services:
-      # Имя сервиса, которое будет использоваться как хост
       postgres:
-        image: postgres:14-alpine # Используем легковесный образ Postgres
-        # Переменные окружения для создания пользователя и БД
+        image: postgres:14-alpine
         env:
           POSTGRES_USER: user
           POSTGRES_PASSWORD: password
           POSTGRES_DB: testdb
-        # Опции для проверки, что БД готова принимать подключения
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -42,5 +39,7 @@ jobs:
         run: npm ci
       - name: Build application
         run: npm run build
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy
       - name: Run E2E tests
         run: npm run test:e2e
