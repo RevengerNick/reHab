@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ProjectsModule } from './projects/projects.module';
 import { ChannelsModule } from './channels/channels.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ChannelsModule } from './channels/channels.module';
     AuthModule,
     ProjectsModule,
     ChannelsModule,
+    GatewayModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService, HealthService, PrismaService],

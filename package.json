@@ -1,0 +1,19 @@
+{
+  "name": "xabar-dev-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev --parallel",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "packageManager": "npm@10.2.4",
+  "devDependencies": {
+    "turbo": "^2.0.9", 
+    "typescript": "^5.4.2", 
+    "prettier": "^3.2.5" 
+  }
+}
