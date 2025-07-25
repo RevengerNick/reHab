@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.json", // На три уровня выше!
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./"
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

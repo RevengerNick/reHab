@@ -25,6 +25,7 @@
 # VSCode settings
 .vscode/
 .history/
+.turbo/
 
 # System files
 .DS_Store
