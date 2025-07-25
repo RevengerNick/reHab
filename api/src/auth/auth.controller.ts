@@ -6,6 +6,7 @@ import {
   Request,
   UseGuards,
   Get,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,6 +23,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('local'))
   @Post('login')
+  @HttpCode(200)
   async login(@Request() req) {
     return this.authService.login(req.user);
   }
