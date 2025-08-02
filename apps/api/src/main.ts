@@ -6,9 +6,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: 'http://localhost:3000', // Разрешаем запросы от нашего фронтенда
+    origin: 'https://rehab.revenger.dev', // Разрешаем запросы от нашего фронтенда
     credentials: true, // Разрешаем передачу cookie (понадобится в будущем)
   });
-  await app.listen(process.env.PORT ?? 2999);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
