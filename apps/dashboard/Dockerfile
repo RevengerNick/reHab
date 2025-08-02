@@ -37,4 +37,4 @@ COPY --from=builder /usr/src/app/.next ./.next
 EXPOSE 3000
 
 # Команда для запуска продакшен-сервера Next.js
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]

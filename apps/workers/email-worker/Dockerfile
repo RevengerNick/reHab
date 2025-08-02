@@ -20,4 +20,4 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 # Команда для запуска нашего воркера
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start"]

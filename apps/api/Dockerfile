@@ -43,4 +43,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 # Команда для запуска приложения
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start"]
