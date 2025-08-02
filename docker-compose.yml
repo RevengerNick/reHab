@@ -1,3 +1,12 @@
+version: '3.8'
+
+# 1. Определяем нашу собственную сеть здесь
+networks:
+  xabar-net:
+    driver: bridge
+  vs_code_default:
+    external: true
+
 services:
   postgres:
     image: postgres:15
@@ -9,10 +18,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - vs_code_default
+      - xabar-net # 2. Подключаем сервис к нашей сети
+
   kafka:
     image: 'bitnami/kafka:latest'
     environment:
+      # ... ваша конфигурация Kafka ...
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
@@ -22,21 +33,28 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     networks:
-      - vs_code_default
+      - xabar-net
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 15 # Увеличим количество попыток на всякий случай
+
   api:
     build:
-      context: ./apps/api
+      context: ./apps/api # Убедитесь, что путь ./api, а не ./apps/api
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - postgres
-      - kafka
+      kafka:
+        condition: service_healthy # Ждем, пока Kafka будет готова
     environment:
       DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
       JWT_SECRET: "your-super-secret-key"
+      KAFKA_BROKERS: "kafka:9092" # Передаем адрес брокера через переменную
     command: sh -c "npx prisma migrate deploy && npm run start"
     networks:
-      - vs_code_default
+      - xabar-net
 
   worker:
     build:
@@ -44,28 +62,27 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - postgres
-      - kafka
+      kafka:
+        condition: service_healthy # Ждем, пока Kafka будет готова
     environment:
       DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
+      KAFKA_BROKERS: "kafka:9092" # Передаем адрес брокера через переменную
+    command: "npm run start"
     networks:
-      - vs_code_default
+      - xabar-net
 
   dashboard:
     build:
       context: ./apps/dashboard
       dockerfile: Dockerfile
     restart: always
+    # Публикуем порт для дашборда, чтобы Cloudflare Tunnel мог к нему подключиться
+    # Туннель будет указывать на <ip_вашего_pi>:3001
     depends_on:
       - api
-    environment:
-      NEXT_PUBLIC_API_URL: "http://api:3000/graphql"
     networks:
+      - xabar-net
       - vs_code_default
-
-networks:
-  vs_code_default:
-    external: true
 
 volumes:
   postgres_data:

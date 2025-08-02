@@ -10,7 +10,7 @@ import { setContext } from '@apollo/client/link/context'; // Импортиру�
 
 // Шаг 1: Создаем "HTTP Link" - это основное соединение с нашим API
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/graphql",
+  uri: "/api/graphql", // Теперь запросы пойдут на наш собственный сервер
 });
 
 // Шаг 2: Создаем "Auth Link" - это middleware, которое добавляет токен
