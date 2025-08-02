@@ -27,7 +27,7 @@ COPY package*.json ./
 RUN npm install --only=production
 
 # Копируем конфигурацию Next.js из стадии сборки
-COPY --from=builder /usr/src/app/next.config.js ./
+COPY --from=builder /usr/src/app/next.config.ts ./
 # Копируем папку с публичными ассетами (изображения, шрифты)
 COPY --from=builder /usr/src/app/public ./public
 # Копируем саму собранную и оптимизированную сборку приложения
