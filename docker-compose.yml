@@ -2,8 +2,6 @@ version: '3.8'
 
 # 1. Определяем нашу собственную сеть здесь
 networks:
-  xabar-net:
-    driver: bridge
   vs_code_default:
     external: true
 
@@ -18,7 +16,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - xabar-net # 2. Подключаем сервис к нашей сети
+      - vs_code_default # 2. Подключаем сервис к нашей сети
 
   rehab-kafka:
     image: 'bitnami/kafka:latest'
@@ -33,7 +31,7 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     networks:
-      - xabar-net
+      - vs_code_default
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092"]
       interval: 10s
@@ -54,7 +52,7 @@ services:
       KAFKA_BROKERS: "rehab-kafka:9092" # Передаем адрес брокера через переменную
     command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
     networks:
-      - xabar-net
+      - vs_code_default
 
   rehab-worker:
     build:
@@ -69,7 +67,7 @@ services:
       KAFKA_BROKERS: "rehab-kafka:9092" # Передаем адрес брокера через переменную
     command: "npm run start"
     networks:
-      - xabar-net
+      - vs_code_default
 
   rehab-dashboard:
     build:
@@ -81,7 +79,6 @@ services:
     depends_on:
       - rehab-api
     networks:
-      - xabar-net
       - vs_code_default
 
 volumes:
