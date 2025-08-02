@@ -6,6 +6,7 @@ import { ChannelCard } from '@/components/channels/channel-card';
 import { ChannelFormDialog } from '@/components/channels/channel-form-dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Channel } from '@/types';
 
 // 1. Обновляем GraphQL-запрос
 const GET_CHANNELS_QUERY = gql`
@@ -25,21 +26,6 @@ const GET_CHANNELS_QUERY = gql`
 `;
 
 
-export enum ChannelType {
-    EMAIL = 'EMAIL',
-    SMS = 'SMS',
-    TELEGRAM = 'TELEGRAM'
-  }
-// Определяем тип для наших данных, чтобы избежать 'any'
-interface Channel {
-  id: string;
-  type: ChannelType;
-  isEnabled: boolean;   
-  config: object;
-  project: {
-    publicId: string;
-  };
-}
 
 export default function ProjectSettingsPage() {
   const params = useParams();

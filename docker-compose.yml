@@ -62,5 +62,9 @@ services:
     networks:
       - vs_code_default
 
+networks:
+  vs_code_default:
+    external: true
+
 volumes:
   postgres_data:

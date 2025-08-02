@@ -5,6 +5,7 @@ import { gql, useMutation } from "@apollo/client";
 import { ChannelFormDialog } from "./channel-form-dialog";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { ChannelType } from "@/types";
 
 // Мутация для обновления статуса isEnabled
 const UPDATE_CHANNEL_STATUS_MUTATION = gql`
@@ -15,12 +16,6 @@ const UPDATE_CHANNEL_STATUS_MUTATION = gql`
     }
   }
 `;
-
-export enum ChannelType {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  TELEGRAM = 'TELEGRAM'
-}
 
 interface ChannelDetails {
   name: string;
@@ -54,7 +49,6 @@ export function ChannelCard({ channel, onChannelUpdated }: {
       variables: {
         updateChannelDto: { 
           id: channel.id,
-          projectPublicId: channel.project.publicId, // ВАЖНО для ProjectOwnerGuard!
           isEnabled: isEnabled,
         }
       }
@@ -82,7 +76,7 @@ export function ChannelCard({ channel, onChannelUpdated }: {
           {/* Этот компонент будет содержать кнопку и диалог для редактирования */}
           <ChannelFormDialog
             isEditing={true}
-            projectPublicId={channel.project.publicId} // Передаем ID проекта
+            publicId={channel.project.publicId} // Передаем ID проекта
             channelToEdit={channel}
             onCompleted={onChannelUpdated}
           >
