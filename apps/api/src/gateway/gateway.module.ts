@@ -14,7 +14,7 @@ import { GatewayService } from './gateway.service';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: ['localhost:9092'], // Адрес нашего Kafka-брокера
+            brokers: ['kafka:9092'], // Адрес нашего Kafka-брокера
           },
           consumer: {
             groupId: 'xabar-api-consumer' // Уникальный ID группы (необязателен для продюсера, но хорошая практика)
