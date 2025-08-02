@@ -8,7 +8,7 @@ networks:
     external: true
 
 services:
-  postgres:
+  rehab-postgres:
     image: postgres:15
     restart: always
     environment:
@@ -20,7 +20,7 @@ services:
     networks:
       - xabar-net # 2. Подключаем сервис к нашей сети
 
-  kafka:
+  rehab-kafka:
     image: 'bitnami/kafka:latest'
     environment:
       # ... ваша конфигурация Kafka ...
@@ -40,38 +40,38 @@ services:
       timeout: 5s
       retries: 15 # Увеличим количество попыток на всякий случай
 
-  api:
+  rehab-api:
     build:
       context: ./apps/api # Убедитесь, что путь ./api, а не ./apps/api
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      kafka:
+      rehab-kafka:
         condition: service_healthy # Ждем, пока Kafka будет готова
     environment:
-      DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
+      DATABASE_URL: "postgresql://user:password@rehab-postgres:5432/xabar_dev"
       JWT_SECRET: "your-super-secret-key"
-      KAFKA_BROKERS: "kafka:9092" # Передаем адрес брокера через переменную
-    command: sh -c "npx prisma migrate deploy && npm run start"
+      KAFKA_BROKERS: "rehab-kafka:9092" # Передаем адрес брокера через переменную
+    command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
     networks:
       - xabar-net
 
-  worker:
+  rehab-worker:
     build:
       context: ./apps/workers/email-worker
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      kafka:
+      rehab-kafka:
         condition: service_healthy # Ждем, пока Kafka будет готова
     environment:
-      DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
-      KAFKA_BROKERS: "kafka:9092" # Передаем адрес брокера через переменную
+      DATABASE_URL: "postgresql://user:password@rehab-postgres:5432/xabar_dev"
+      KAFKA_BROKERS: "rehab-kafka:9092" # Передаем адрес брокера через переменную
     command: "npm run start"
     networks:
       - xabar-net
 
-  dashboard:
+  rehab-dashboard:
     build:
       context: ./apps/dashboard
       dockerfile: Dockerfile
@@ -79,7 +79,7 @@ services:
     # Публикуем порт для дашборда, чтобы Cloudflare Tunnel мог к нему подключиться
     # Туннель будет указывать на <ip_вашего_pi>:3001
     depends_on:
-      - api
+      - rehab-api
     networks:
       - xabar-net
       - vs_code_default
