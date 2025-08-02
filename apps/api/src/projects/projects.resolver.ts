@@ -6,6 +6,8 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
+import { ProjectOwnerGuard } from './guards/project-owner.guard';
+import { ID } from '@nestjs/graphql';
 
 @Resolver(() => Project)
 export class ProjectsResolver {
@@ -14,10 +16,10 @@ export class ProjectsResolver {
   @Mutation(() => Project)
   @UseGuards(GqlAuthGuard)
   createProject(
-    @Args('createProjectInput') createProjectInput: CreateProjectDto,
+    @Args('createProjectDto') createProjectDto: CreateProjectDto,
     @Context() context,
   ) {
-    return this.projectsService.create(createProjectInput, context.req.user.id);
+    return this.projectsService.create(createProjectDto, context.req.user.id);
   }
 
   @Query(() => [Project], { name: 'projects' })
@@ -26,15 +28,23 @@ export class ProjectsResolver {
     return this.projectsService.findAllByUserId(context.req.user.id);
   }
 
+  @Query(() => Project, { name: 'project' })
+  @UseGuards(GqlAuthGuard, ProjectOwnerGuard) // Защищаем обоими гардами
+  findOne(@Args('publicId', { type: () => ID }) publicId: string) {
+    // ProjectOwnerGuard уже проверил владение, так что мы можем смело делать запрос.
+    // Переименуем аргумент в 'projectPublicId' в DTO и гарде, чтобы все было единообразно.
+    return this.projectsService.findOneByPublicId(publicId);
+  }
+
   @Mutation(() => Project)
   @UseGuards(GqlAuthGuard)
   updateProject(
-    @Args('updateProjectInput') updateProjectInput: UpdateProjectDto,
+    @Args('updateProjectDto') updateProjectDto: UpdateProjectDto,
     @Context() context,
   ) {
     return this.projectsService.update(
-      updateProjectInput.id,
-      updateProjectInput,
+      updateProjectDto.publicId,
+      updateProjectDto,
     );
   }
 

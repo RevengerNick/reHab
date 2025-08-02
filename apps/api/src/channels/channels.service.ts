@@ -1,44 +1,71 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateChannelDto } from './dto/create-channel.input';
-import { UpdateChannelDto } from './dto/update-channel.input';
+import { CreateChannelDto } from './dto/create-channel.dto';
+import { UpdateChannelDto } from './dto/update-channel.dto';
 
 @Injectable()
 export class ChannelsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createChannelDto: CreateChannelDto) {
-    const { projectId, type, config } = createChannelDto;
+  async create(createChannelDto: CreateChannelDto) {
+    const { publicId, ...data } = createChannelDto;
+    
     return this.prisma.channel.create({
-      data: { projectId, type, config },
+      data: {
+        ...data,
+        project: {
+          connect: { publicId: publicId },
+        },
+      },
+      include: { project: true },
     });
   }
 
-  findAllByProjectId(projectId: string) {
-    return this.prisma.channel.findMany({ where: { projectId } });
+  findAllByProjectId(projectPublicId: string) {
+    return this.prisma.channel.findMany({ 
+      where: { 
+        project: { 
+          publicId: projectPublicId 
+        } 
+      },
+      include: { project: true },
+      orderBy: { priority: 'asc' }
+    });
   }
 
-  update(channelId: string, updateChannelDto: UpdateChannelDto) {
+  async update(updateChannelDto: UpdateChannelDto) {
+    const { id, projectPublicId, ...dataToUpdate } = updateChannelDto;
+
+    // Дополнительная проверка: убеждаемся, что канал принадлежит проекту
+    const channelExists = await this.prisma.channel.findFirst({
+        where: { id, project: { publicId: projectPublicId } }
+    });
+
+    if (!channelExists) {
+        throw new NotFoundException(`Канал с ID ${id} не найден в проекте ${projectPublicId}`);
+    }
+
     return this.prisma.channel.update({
-      where: { id: channelId },
-      data: updateChannelDto,
+      where: { id },
+      data: dataToUpdate,
+      include: { project: true },
     });
   }
 
-  async remove(channelId: string, projectId: string) {
+  async remove(channelId: string, projectPublicId: string) {
     const result = await this.prisma.channel.deleteMany({
       where: {
         id: channelId,
-        projectId: projectId,
+        project: { publicId: projectPublicId },
       },
     });
 
     if (result.count === 0) {
       throw new NotFoundException(
-        `Канал с ID ${channelId} не найден в проекте ${projectId}`,
+        `Канал с ID ${channelId} не найден в проекте ${projectPublicId}`,
       );
     }
 
-    return { success: true };
+    return { success: true, id: channelId };
   }
 }

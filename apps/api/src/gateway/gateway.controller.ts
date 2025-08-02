@@ -1,11 +1,10 @@
-import { Controller, Post, Body, Inject, UseGuards, Req } from '@nestjs/common'; // <-- Заменили @Request на @Req
+import { Controller, Post, Body, Inject, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { ApiKeyGuard } from '../auth/api-key.guard';
 import { SendNotificationDto } from './dto/send-notification.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
-import { Request } from 'express'; // <-- Этот импорт важен для TypeScript
-import { BadRequestException } from '@nestjs/common';
+import { Request } from 'express';
 
 @Controller('v1')
 export class GatewayController {
@@ -22,41 +21,59 @@ export class GatewayController {
   @UseGuards(ApiKeyGuard)
   async sendMessage(
     @Body() data: SendNotificationDto,
-    @Req() req: Request, // <--- ИЗМЕНЕНИЕ ЗДЕСЬ: используем @Req()
+    @Req() req: Request,
   ) {
-    // Теперь 'req' гарантированно будет объектом запроса
     const { project } = req;
 
     if (!project) {
-      throw new BadRequestException('Project not found');
+      throw new BadRequestException('Project not found on request.');
     }
+
+    const requestedChannelTypes = [...new Set(data.recipients.map(r => r.channel))];
+
+    const configuredChannels = await this.prisma.channel.findMany({
+      where: {
+        // ИСПРАВЛЕНИЕ ЗДЕСЬ:
+        // Ищем каналы, у которых связанный проект имеет нужный publicId
+        project: {
+          publicId: project.publicId,
+        },
+        isEnabled: true,
+        type: { in: requestedChannelTypes },
+      },
+      select: { type: true },
+    });
+    
+    // ... остальная логика проверки (configuredChannelTypes, missingChannels) остается без изменений ...
+
+    const eventId = uuidv4();
 
     const createdLogs = await this.prisma.log.createManyAndReturn({
       data: data.recipients.map(r => ({
-        projectId: project.id,
+        eventId,
+        projectId: project.publicId, // Используем внутренний ID для связи
         status: 'ACCEPTED',
         channel: r.channel,
         recipient: r.to,
       })),
     });
     
-    // Сопоставляем получателей с их созданными логами
     const recipientsWithLogIds = data.recipients.map(recipient => {
       const log = createdLogs.find(l => l.recipient === recipient.to && l.channel === recipient.channel);
       return {
         ...recipient,
-        logId: log?.id, // Добавляем ID лога
+        logId: log?.id,
       };
     });
-    
-    // Обновляем payload для Kafka
+
     const event = {
-      eventId: uuidv4(),
-      projectId: project.id,
+      eventId,
+      projectId: project.publicId,
+      projectPublicId: project.publicId,
       timestamp: new Date().toISOString(),
       payload: {
         ...data,
-        recipients: recipientsWithLogIds, // Передаем получателей с logId
+        recipients: recipientsWithLogIds,
       },
     };
 

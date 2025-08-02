@@ -30,9 +30,13 @@ export class ProjectsService {
     });
   }
 
+  async findOneByPublicId(publicId: string) {
+    return this.prisma.project.findUnique({ where: { publicId } });
+  }
+
   async findOne(id: string): Promise<Project | null> {
     return this.prisma.project.findUnique({
-      where: { id },
+      where: { publicId: id },
     });
   }
 
@@ -41,14 +45,14 @@ export class ProjectsService {
     updateProjectDto: UpdateProjectDto,
   ): Promise<Project> {
     return this.prisma.project.update({
-      where: { id },
+      where: { publicId: id },
       data: updateProjectDto,
     });
   }
 
   async remove(id: string): Promise<Project> {
     return this.prisma.project.delete({
-      where: { id },
+      where: { publicId: id },
     });
   }
 }

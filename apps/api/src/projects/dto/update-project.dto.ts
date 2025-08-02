@@ -7,5 +7,5 @@ import { IsUUID } from 'class-validator';
 export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   @Field()
   @IsUUID()
-  id: string;
+  publicId: string;
 }

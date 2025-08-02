@@ -1,38 +1,30 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
-
-export enum ChannelTypeEnum {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  TELEGRAM = 'TELEGRAM',
-  PUSH = 'PUSH',
-}
-
-import { registerEnumType } from '@nestjs/graphql';
-registerEnumType(ChannelTypeEnum, {
-  name: 'ChannelType',
-});
+import { Project } from 'src/projects/entities/project.entity';
 
 @ObjectType()
 export class Channel {
   @Field(() => ID)
   id: string;
 
-  @Field(() => ChannelTypeEnum)
-  type: ChannelTypeEnum;
+  @Field()
+  name: string;
 
-  @Field(() => GraphQLJSONObject)
-  config: object;
+  @Field()
+  type: string;
+
+  @Field()
+  provider: string;
 
   @Field()
   isEnabled: boolean;
 
-  @Field(() => String)
-  projectId: string;
-}
-
-@ObjectType()
-export class SuccessResponse {
-  @Field(() => Boolean)
-  success: boolean;
+  @Field(() => Int)
+  priority: number;
+  
+  @Field(() => GraphQLJSONObject)
+  config: object;
+  
+  @Field(() => Project)
+  project: Project;
 }

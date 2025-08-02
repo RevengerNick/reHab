@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GatewayController } from './gateway.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { GatewayResolver } from './gateway.resolver';
+import { GatewayService } from './gateway.service';
 
 @Module({
   imports: [
@@ -22,5 +24,6 @@ import { PrismaModule } from '../prisma/prisma.module';
     ]),
   ],
   controllers: [GatewayController],
+  providers: [GatewayResolver, GatewayService],
 })
 export class GatewayModule {}

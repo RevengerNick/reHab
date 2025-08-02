@@ -17,6 +17,7 @@ model User {
   id        String    @id @default(uuid())
   email     String    @unique
   password  String
+  name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   Project   Project[]
@@ -24,6 +25,7 @@ model User {
 
 model Project {
   id        String    @id @default(uuid())
+  publicId  String    @unique @default(nanoid())
   name      String
   user      User      @relation(fields: [userId], references: [id])
   userId    String
@@ -34,15 +36,25 @@ model Project {
 }
 
 model Channel {
-  id            String      @id @default(uuid())
-  type          ChannelType // EMAIL, SMS, TELEGRAM
-  project       Project     @relation(fields: [projectId], references: [id])
-  projectId     String
-  config        Json // Здесь будут храниться API-ключи и настройки для внешних сервисов
-  isEnabled     Boolean     @default(true)
-  failureCount  Int         @default(0)
+  id String @id @default(cuid()) // Короткий и безопасный ID
+
+  // Связь с проектом
+  project   Project @relation(fields: [projectId], references: [publicId])
+  projectId String
+
+  // Новые, более гибкие поля
+  name     String // Имя, которое дает пользователь, напр. "Основной SendGrid"
+  type     String // EMAIL, SMS и т.д.
+  provider String // GENERIC_SMTP, MAILTRAP_API, SENDGRID_API и т.д.
+  config   Json // Хранит любые настройки (API ключи, хосты...)
+  priority Int    @default(0) // 0 - самый высокий, 1, 2 и т.д.
+
+  // Поля для Circuit Breaker
+  isEnabled     Boolean   @default(true)
+  failureCount  Int       @default(0)
   lastFailureAt DateTime?
-  createdAt     DateTime    @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 enum ChannelType {
@@ -54,12 +66,13 @@ enum ChannelType {
 
 model Log {
   id           String    @id @default(uuid())
-  project      Project   @relation(fields: [projectId], references: [id])
+  project      Project   @relation(fields: [projectId], references: [publicId])
   projectId    String
   status       String // Например, "ACCEPTED", "PROCESSING", "SENT", "FAILED"
   channel      String // EMAIL, SMS...
   recipient    String // email/телефон получателя
   sentAt       DateTime? // Время фактической отправки
   errorDetails String?
+  eventId      String?
   createdAt    DateTime  @default(now())
 }

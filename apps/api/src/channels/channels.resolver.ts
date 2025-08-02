@@ -1,48 +1,50 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ChannelsService } from './channels.service';
-import { Channel, SuccessResponse } from './entities/channel.entity';
-import { CreateChannelDto } from './dto/create-channel.input';
-import { UpdateChannelDto } from './dto/update-channel.input';
+import { Channel } from './entities/channel.entity';
+import { CreateChannelDto } from './dto/create-channel.dto';
+import { UpdateChannelDto } from './dto/update-channel.dto';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { ProjectOwnerGuard } from '../projects/guards/project-owner.guard';
-import { RemoveChannelInput } from './dto/delete-channel.input';
+import { SuccessResponse } from 'src/common/entities/response.entity';
 
 @Resolver(() => Channel)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard) // Все операции требуют аутентификации
 export class ChannelsResolver {
   constructor(private readonly channelsService: ChannelsService) {}
 
-  @Mutation(() => Channel)
-  @UseGuards(ProjectOwnerGuard)
+  @Mutation(() => Channel, { name: 'createChannel' })
+  @UseGuards(ProjectOwnerGuard) // Требует владения проектом
   createChannel(
-    @Args('createChannelInput') createChannelInput: CreateChannelDto,
+    @Args('createChannelDto') createChannelDto: CreateChannelDto,
   ) {
-    return this.channelsService.create(createChannelInput);
+    // Guard уже проверил projectPublicId, поэтому мы можем спокойно передавать DTO
+    return this.channelsService.create(createChannelDto);
   }
 
   @Query(() => [Channel], { name: 'channels' })
-  @UseGuards(ProjectOwnerGuard)
+  @UseGuards(ProjectOwnerGuard) // Требует владения проектом
   findAllByProjectId(
-    @Args('projectId', { type: () => String }) projectId: string,
+    @Args('publicId', { type: () => ID }) publicId: string,
   ) {
-    return this.channelsService.findAllByProjectId(projectId);
+    return this.channelsService.findAllByProjectId(publicId);
   }
 
-  @Mutation(() => Channel)
-  @UseGuards(ProjectOwnerGuard)
+  @Mutation(() => Channel, { name: 'updateChannel' })
+  @UseGuards(ProjectOwnerGuard) // Требует владения проектом
   updateChannel(
-    @Args('updateChannelInput') updateChannelInput: UpdateChannelDto,
+    @Args('updateChannelDto') updateChannelDto: UpdateChannelDto,
   ) {
-    return this.channelsService.update(
-      updateChannelInput.id,
-      updateChannelInput,
-    );
+    // Guard проверил projectPublicId, а сервис проверит связь канала с проектом
+    return this.channelsService.update(updateChannelDto);
   }
-
-  @Mutation(() => SuccessResponse)
-  @UseGuards(ProjectOwnerGuard)
-  removeChannel(@Args('input') input: RemoveChannelInput) {
-    return this.channelsService.remove(input.channelId, input.projectId);
+  
+  @Mutation(() => SuccessResponse, { name: 'removeChannel' })
+  @UseGuards(ProjectOwnerGuard) // Требует владения проектом
+  removeChannel(
+      @Args('id', { type: () => ID }) id: string,
+      @Args('publicId', { type: () => ID }) publicId: string,
+  ) {
+      return this.channelsService.remove(id, publicId);
   }
 }

@@ -6,7 +6,7 @@ import { IsDate, IsString, IsUUID } from 'class-validator';
 export class Project {
   @Field(() => ID)
   @IsUUID()
-  id: string;
+  publicId: string;
 
   @Field()
   @IsString()

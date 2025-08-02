@@ -1,13 +1,13 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsUUID } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 @InputType()
-export class RemoveChannelInput {
+export class DeleteChannelDto {
   @Field(() => String)
-  @IsUUID()
+  @IsString()
   channelId: string;
 
   @Field(() => String)
-  @IsUUID()
-  projectId: string;
+  @IsString()
+  publicId: string;
 }

@@ -17,40 +17,33 @@ export class ProjectOwnerGuard implements CanActivate {
       return false;
     }
 
-    // --- НОВАЯ, УНИВЕРСАЛЬНАЯ ЛОГИКА ПОИСКА projectId ---
-    let projectId: string;
+    let publicId: string | undefined;
 
-    // Приоритет №1: Ищем аргумент с именем 'projectId' напрямую.
-    if (args.projectId && typeof args.projectId === 'string') {
-      projectId = args.projectId;
+    // Приоритет №1: Ищем напрямую (для простых Query)
+    if (args.publicId) {
+      publicId = args.publicId;
     } 
-    // Приоритет №2: Ищем в стандартном контейнере 'input'.
-    else if (args.input?.projectId && typeof args.input.projectId === 'string') {
-      projectId = args.input.projectId;
-    } 
-    // Приоритет №3 (запасной): Ищем ЛЮБОЙ объект в аргументах, у которого есть свойство 'projectId'.
+    // Приоритет №2: Ищем ВНУТРИ объекта 'input' (для Mutation)
+    else if (args.input?.publicId) {
+      publicId = args.input.publicId;
+    }
+    // Приоритет №3 (запасной): Ищем в любом другом вложенном объекте
     else {
       const inputObject = Object.values(args).find(
-        (arg) => typeof arg === 'object' && arg !== null && 'projectId' in arg,
-      ) as { projectId?: string };
-      if (!inputObject?.projectId) {
-        throw new InternalServerErrorException(
-          'ProjectOwnerGuard: Не удалось определить projectId из аргументов запроса.',
-        );
-      }
-      projectId = inputObject.projectId;
+        (arg) => typeof arg === 'object' && arg !== null && 'publicId' in arg,
+      ) as { publicId?: string };
+      publicId = inputObject?.publicId;
     }
     
-    // Если после всех попыток projectId не найден, это ошибка конфигурации, а не доступа.
-    if (!projectId) {
+    if (!publicId) {
+      // Эта ошибка теперь будет возникать только если мы СОВСЕМ неправильно сконфигурировали резолвер
       throw new InternalServerErrorException(
-        'ProjectOwnerGuard: Не удалось определить projectId из аргументов запроса.',
+        'ProjectOwnerGuard: Не удалось определить publicId из аргументов запроса.',
       );
     }
-    // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
 
     const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
+      where: { publicId: publicId },
       select: { userId: true },
     });
 

@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { EmailWorkerService } from './email-worker.service';
+import { EmailWorkerService } from '../email/email-worker.service';
 
 export interface NotificationEvent {
   eventId: string;

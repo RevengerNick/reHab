@@ -1,20 +1,66 @@
 services:
-  kafka:
-    # Используем образ от Bitnami - он отлично подходит для KRaft
-    image: 'bitnami/kafka:latest'
-    ports:
-      # Порт для подключения клиентов ИЗВНЕ Docker-сети (наш NestJS)
-      - '9092:9092'
+  postgres:
+    image: postgres:15
+    restart: always
     environment:
-      # --- KRaft-режим без ZooKeeper ---
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: xabar_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vs_code_default
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      # --- Настройка слушателей (listeners) ---
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      # --- Базовые настройки брокера ---
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      # Автоматически создавать топики, если их нет
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    networks:
+      - vs_code_default
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
+      JWT_SECRET: "your-super-secret-key"
+    networks:
+      - vs_code_default
+
+  worker:
+    build:
+      context: ./apps/workers/email-worker
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
+    networks:
+      - vs_code_default
+
+  dashboard:
+    build:
+      context: ./apps/dashboard
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: "http://api:3000/graphql"
+    networks:
+      - vs_code_default
+
+volumes:
+  postgres_data:
