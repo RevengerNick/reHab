@@ -34,6 +34,7 @@ services:
     environment:
       DATABASE_URL: "postgresql://user:password@postgres:5432/xabar_dev"
       JWT_SECRET: "your-super-secret-key"
+    command: sh -c "npx prisma migrate deploy && npm run start"
     networks:
       - vs_code_default
 
